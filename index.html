@@ -17,7 +17,7 @@
         height = $(window).height(),
         τ = 2 * Math.PI;
 
-    var numVertices = (width * height) / 10000;
+    var numVertices = (width * height) / 20000;
 
     var nodes = d3.range(numVertices).map(function() {
       return {
@@ -63,7 +63,7 @@
         context.moveTo(d.source.x, d.source.y);
         context.lineTo(d.target.x, d.target.y);
       });
-      context.lineWidth = 1;
+      context.lineWidth = 1.5;
       context.strokeStyle = "#1D72AB";
       context.stroke();
 
@@ -72,12 +72,12 @@
       nodes.forEach(function(d) {
         // gravity(.2 * e.alpha)(d);
         context.moveTo(d.x, d.y);
-        context.arc(d.x, d.y, 3, 0, τ);
+        context.arc(d.x, d.y, 2, 0, τ);
       });
-      // context.lineWidth = 1;
-      // context.strokeStyle = "#4DA2DB";
-      // context.stroke();
-      context.fillStyle = "#4DA2DB";
+      context.lineWidth = 4;
+      context.strokeStyle = "#4DA2DB";
+      context.stroke();
+      context.fillStyle = "#375585";
       context.fill();
     }
 
@@ -104,7 +104,7 @@
     });
 
 
-    // d3.select(window).on("click", function() {
+    d3.select(window).on("click", function() {
     //   cursor = d3.mouse(this);
       
     //   nodes.push({
@@ -113,7 +113,23 @@
     //     });
 
     //   force.nodes(nodes);
-    // })
+
+      Window.f = force;
+      force.stop();
+      var links = voronoi.links(nodes)
+      force.links(links);
+
+            // Draw lines
+      context.beginPath();
+      // console.log("Drawing ", links.length, " lines");
+      links.forEach(function(d) {
+        context.moveTo(d.source.x, d.source.y);
+        context.lineTo(d.target.x, d.target.y);
+      });
+      context.lineWidth = 1;
+      context.strokeStyle = "#f00";
+      context.stroke();
+    })
 
     </script>
   </body>
