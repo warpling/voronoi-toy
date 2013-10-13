@@ -17,7 +17,7 @@
         height = $(window).height(),
         τ = 2 * Math.PI;
 
-    var numVertices = (width * height) / 3000;
+    var numVertices = (width * height) / 10000;
 
     var nodes = d3.range(numVertices).map(function() {
       return {
@@ -35,9 +35,9 @@
     var links = voronoi.links(nodes);
 
     var force = d3.layout.force()
-        // .friction(.99)
+        .friction(.95)
         // .gravity(.01)
-        .charge(-300)
+        .charge(-500)
         .alpha(2)
         .size([width, height])
         .nodes(nodes)
@@ -72,11 +72,11 @@
       nodes.forEach(function(d) {
         // gravity(.2 * e.alpha)(d);
         context.moveTo(d.x, d.y);
-        context.arc(d.x, d.y, 2, 0, τ);
+        context.arc(d.x, d.y, 3, 0, τ);
       });
-      context.lineWidth = 3;
-      context.strokeStyle = "#4DA2DB";
-      context.stroke();
+      // context.lineWidth = 1;
+      // context.strokeStyle = "#4DA2DB";
+      // context.stroke();
       context.fillStyle = "#4DA2DB";
       context.fill();
     }
@@ -89,23 +89,31 @@
       };
     }
 
-    canvas.on("mousemove", function() {
+    d3.select(window).on("focus", function() {
+      force.resume();
+    });
+
+    d3.select(window).on("blur", function() {
+      console.log("stop")
+      force.stop();
+    });
+
+    d3.select(window).on("mousemove", function() {
       console.log("move")
       force.resume();
     });
 
 
-    canvas.on("click", function() {
-      console.log("click")
-      cursor = d3.mouse(this);
+    // d3.select(window).on("click", function() {
+    //   cursor = d3.mouse(this);
       
-      nodes.push({
-          x: cursor[0],
-          y: cursor[1]
-        });
+    //   nodes.push({
+    //       x: cursor[0],
+    //       y: cursor[1]
+    //     });
 
-      force.nodes(nodes);
-    })
+    //   force.nodes(nodes);
+    // })
 
     </script>
   </body>
