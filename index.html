@@ -1,0 +1,112 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link type="text/css" rel="stylesheet" href="style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+  </head>
+  <body class="vignette">
+    <!-- <p id="name">Ryan McLeod</p> -->
+    <!-- <div class="card"></div> -->
+
+
+
+    <script type="text/javascript">
+
+    var width = $(window).width(),
+        height = $(window).height(),
+        τ = 2 * Math.PI;
+
+    var numVertices = (width * height) / 3000;
+
+    var nodes = d3.range(numVertices).map(function() {
+      return {
+        x: Math.random() * width,
+        y: Math.random() * height
+      };
+    });
+
+    var attractionPoint = {x:width/2, y:height/2};
+
+    var voronoi = d3.geom.voronoi()
+        .x(function(d) { return d.x; })
+        .y(function(d) { return d.y; });
+
+    var links = voronoi.links(nodes);
+
+    var force = d3.layout.force()
+        // .friction(.99)
+        // .gravity(.01)
+        .charge(-300)
+        .alpha(2)
+        .size([width, height])
+        .nodes(nodes)
+        .links(links)
+        .on("tick", ticked)
+        .start();
+
+    var canvas = d3.select("body").append("canvas")
+        .attr("id", "graphCanvas")
+        .attr("width", width)
+        .attr("height", height);
+
+    var context = canvas.node().getContext("2d");
+
+    function ticked(e) {
+      // Clear screen
+      context.clearRect(0, 0, width, height);
+
+      // Draw lines
+      context.beginPath();
+      // console.log("Drawing ", links.length, " lines");
+      links.forEach(function(d) {
+        context.moveTo(d.source.x, d.source.y);
+        context.lineTo(d.target.x, d.target.y);
+      });
+      context.lineWidth = 1;
+      context.strokeStyle = "#1D72AB";
+      context.stroke();
+
+      // Draw circles
+      context.beginPath();
+      nodes.forEach(function(d) {
+        // gravity(.2 * e.alpha)(d);
+        context.moveTo(d.x, d.y);
+        context.arc(d.x, d.y, 2, 0, τ);
+      });
+      context.lineWidth = 3;
+      context.strokeStyle = "#4DA2DB";
+      context.stroke();
+      context.fillStyle = "#4DA2DB";
+      context.fill();
+    }
+
+    // Move nodes toward cluster focus.
+    function gravity(alpha) {
+      return function(d) {
+        d.y += (attractionPoint.y - d.y) * alpha;
+        d.x += (attractionPoint.x - d.x) * alpha;
+      };
+    }
+
+    canvas.on("mousemove", function() {
+      console.log("move")
+      force.resume();
+    });
+
+
+    canvas.on("click", function() {
+      console.log("click")
+      cursor = d3.mouse(this);
+      
+      nodes.push({
+          x: cursor[0],
+          y: cursor[1]
+        });
+
+      force.nodes(nodes);
+    })
+
+    </script>
+  </body>
+</html>
