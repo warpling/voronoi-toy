@@ -6,10 +6,11 @@
     <script src="http://d3js.org/d3.v3.min.js"></script>
   </head>
   <body class="vignette">
-    <!-- <p id="name">Ryan McLeod</p> -->
+    <h2 id="name">Hello! My name is Ryan.</h2>
+    <h2 id="name">I like making things like this</h2>
+    <h2 id="name">instead of studying.</h2>
+
     <!-- <div class="card"></div> -->
-
-
 
     <script type="text/javascript">
 
@@ -17,7 +18,8 @@
         height = $(window).height(),
         τ = 2 * Math.PI;
 
-    var numVertices = (width * height) / 20000;
+    // var numVertices = (width * height) / 20000;
+    var numVertices = 1;
 
     var nodes = d3.range(numVertices).map(function() {
       return {
@@ -36,9 +38,9 @@
 
     var force = d3.layout.force()
         .friction(.95)
-        // .gravity(.01)
-        .charge(-500)
-        .alpha(2)
+        .gravity(.03)
+        // .charge(-100)
+        // .alpha(2)
         .size([width, height])
         .nodes(nodes)
         .links(links)
@@ -46,31 +48,66 @@
         .start();
 
     var canvas = d3.select("body").append("canvas")
-        .attr("id", "graphCanvas")
+        .attr("id", "graph_canvas")
         .attr("width", width)
         .attr("height", height);
 
     var context = canvas.node().getContext("2d");
 
     function ticked(e) {
+
+      // Draw new lines
+      links = voronoi.links(force.nodes())
+
       // Clear screen
       context.clearRect(0, 0, width, height);
 
-      // Draw lines
-      context.beginPath();
-      // console.log("Drawing ", links.length, " lines");
-      links.forEach(function(d) {
-        context.moveTo(d.source.x, d.source.y);
-        context.lineTo(d.target.x, d.target.y);
-      });
-      context.lineWidth = 1.5;
-      context.strokeStyle = "#1D72AB";
-      context.stroke();
+      drawDots(context, nodes);
+      drawLines(context, links)
 
-      // Draw circles
+    }
+
+    // Move nodes toward cluster focus.
+    // function gravity(alpha) {
+    //   return function(d) {
+    //     d.y += (attractionPoint.y - d.y) * alpha;
+    //     d.x += (attractionPoint.x - d.x) * alpha;
+    //   };
+    // }
+
+    d3.select(window).on("focus", function() {
+      force.resume();
+    });
+
+    d3.select(window).on("blur", function() {
+      force.stop();
+    });
+
+    d3.select(window).on("mousemove", function() {
+      force.resume();
+    });
+
+
+    d3.select(window).on("click", function() {
+      var cursor = d3.mouse(graph_canvas);
+      addPoint(cursor);
+    })
+
+    function addPoint(coordinates) {      
+      force.stop();
+      nodes.push({
+          x: coordinates[0],
+          y: coordinates[1]
+        });
+
+      links = voronoi.links(force.nodes())
+
+      force.start();
+    }
+
+    function drawDots(context, nodes) {
       context.beginPath();
       nodes.forEach(function(d) {
-        // gravity(.2 * e.alpha)(d);
         context.moveTo(d.x, d.y);
         context.arc(d.x, d.y, 2, 0, τ);
       });
@@ -81,55 +118,18 @@
       context.fill();
     }
 
-    // Move nodes toward cluster focus.
-    function gravity(alpha) {
-      return function(d) {
-        d.y += (attractionPoint.y - d.y) * alpha;
-        d.x += (attractionPoint.x - d.x) * alpha;
-      };
-    }
-
-    d3.select(window).on("focus", function() {
-      force.resume();
-    });
-
-    d3.select(window).on("blur", function() {
-      console.log("stop")
-      force.stop();
-    });
-
-    d3.select(window).on("mousemove", function() {
-      console.log("move")
-      force.resume();
-    });
-
-
-    d3.select(window).on("click", function() {
-    //   cursor = d3.mouse(this);
-      
-    //   nodes.push({
-    //       x: cursor[0],
-    //       y: cursor[1]
-    //     });
-
-    //   force.nodes(nodes);
-
-      Window.f = force;
-      force.stop();
-      var links = voronoi.links(nodes)
-      force.links(links);
-
-            // Draw lines
+    function drawLines(context, links) {
       context.beginPath();
-      // console.log("Drawing ", links.length, " lines");
+
       links.forEach(function(d) {
         context.moveTo(d.source.x, d.source.y);
         context.lineTo(d.target.x, d.target.y);
       });
+
       context.lineWidth = 1;
-      context.strokeStyle = "#f00";
+      context.strokeStyle = "#1D72AB";
       context.stroke();
-    })
+    }
 
     </script>
   </body>

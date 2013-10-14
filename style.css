@@ -4,6 +4,7 @@ body {
 
 body.vignette {
   position: relative;
+  padding: 80px;
   margin: 0;
 }
 
@@ -41,13 +42,13 @@ canvas {
 
 }
 
-#name {
+h2 {
   margin: 0;
-  padding: 25% 0 10% 0;
+  padding: 0;
   color: white;
   font-family: "proxima-nova", "HelveticaNeue", Helvetica, Arial, "Lucida Grande", sans-serif;
-  font-size: 3em;
+  font-size: 2.5em;
   font-weight: 600;
-  letter-spacing: 4px;
-  text-align: center;
+  letter-spacing: 1px;
+  line-height: 1.5em;
 }
