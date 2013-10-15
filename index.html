@@ -6,9 +6,10 @@
     <script src="http://d3js.org/d3.v3.min.js"></script>
   </head>
   <body class="vignette">
-    <h2 id="name">Hello! My name is Ryan.</h2>
-    <h2 id="name">I like making things like this</h2>
-    <h2 id="name">instead of studying.</h2>
+    <h2>Hello!</h2>
+    <h2>My name is Ryan.</h2>
+    <h2>I made this instead of</h2>
+    <h2>doing my homework.</h2>
 
     <!-- <div class="card"></div> -->
 
@@ -18,10 +19,10 @@
         height = $(window).height(),
         τ = 2 * Math.PI;
 
-    // var numVertices = (width * height) / 20000;
-    var numVertices = 1;
+    var startPopulation = 1;
+    var endPopulation = (width * height) / 10000;
 
-    var nodes = d3.range(numVertices).map(function() {
+    var nodes = d3.range(startPopulation).map(function() {
       return {
         x: Math.random() * width,
         y: Math.random() * height
@@ -38,8 +39,9 @@
 
     var force = d3.layout.force()
         .friction(.95)
-        .gravity(.03)
-        // .charge(-100)
+        .gravity(.005)
+        // .charge(-8)
+        .charge(function(d, i) {return i == (nodes.length-1) ? -30 : -6})
         // .alpha(2)
         .size([width, height])
         .nodes(nodes)
@@ -54,20 +56,46 @@
 
     var context = canvas.node().getContext("2d");
 
+    var pointGenerator = setInterval(addRandomPoint, 1000);
+
     function ticked(e) {
 
-      // Draw new lines
+      // recalculate voronoi lines
       links = voronoi.links(force.nodes())
 
-      // Clear screen
+      // Redraw
       context.clearRect(0, 0, width, height);
-
-      drawDots(context, nodes);
       drawLines(context, links)
-
+      drawDots(context, nodes);
     }
 
-    // Move nodes toward cluster focus.
+    function drawDots(context, nodes) {
+      context.beginPath();
+      nodes.forEach(function(d) {
+        context.moveTo(d.x, d.y);
+        context.arc(d.x, d.y, 5, 0, τ);
+      });
+      context.lineWidth = 4;
+      context.strokeStyle = "#4DA2DB";
+      context.stroke();
+      context.fillStyle = "#375585";
+      context.fill();
+    }
+
+    function drawLines(context, links) {
+      context.beginPath();
+
+      links.forEach(function(d) {
+        context.moveTo(d.source.x, d.source.y);
+        context.lineTo(d.target.x, d.target.y);
+      });
+
+      context.lineWidth = 1;
+      context.strokeStyle = "#1D72AB";
+      context.stroke();
+    }
+
+    // Move nodes toward a cluster focus.
     // function gravity(alpha) {
     //   return function(d) {
     //     d.y += (attractionPoint.y - d.y) * alpha;
@@ -93,6 +121,16 @@
       addPoint(cursor);
     })
 
+    function addRandomPoint() {
+      addPoint([Math.random() * width/2 + width/4,
+                Math.random() * height/2 + height/4
+               ]);
+
+      // If we have enough nodes, stop making them
+      if(nodes.length >= endPopulation)
+        clearInterval(pointGenerator);
+    }
+
     function addPoint(coordinates) {      
       force.stop();
       nodes.push({
@@ -103,32 +141,6 @@
       links = voronoi.links(force.nodes())
 
       force.start();
-    }
-
-    function drawDots(context, nodes) {
-      context.beginPath();
-      nodes.forEach(function(d) {
-        context.moveTo(d.x, d.y);
-        context.arc(d.x, d.y, 2, 0, τ);
-      });
-      context.lineWidth = 4;
-      context.strokeStyle = "#4DA2DB";
-      context.stroke();
-      context.fillStyle = "#375585";
-      context.fill();
-    }
-
-    function drawLines(context, links) {
-      context.beginPath();
-
-      links.forEach(function(d) {
-        context.moveTo(d.source.x, d.source.y);
-        context.lineTo(d.target.x, d.target.y);
-      });
-
-      context.lineWidth = 1;
-      context.strokeStyle = "#1D72AB";
-      context.stroke();
     }
 
     </script>
