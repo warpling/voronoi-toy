@@ -6,17 +6,13 @@
     <script src="http://d3js.org/d3.v3.min.js"></script>
   </head>
   <body class="vignette">
-    <h2>Hello!</h2>
-    <h2>My name is Ryan.</h2>
-    <h2>I made this instead of</h2>
-    <h2>doing my homework.</h2>
-
-    <!-- <div class="card"></div> -->
+    <h1>Ryan McLeod</h1>
+    <h2 class="intro">I made this instead of doing my homework.</h2>
 
     <script type="text/javascript">
 
-    var width = $(window).width(),
-        height = $(window).height(),
+    var width = $(document).width(),
+        height = $(document).height(),
         τ = 2 * Math.PI;
 
     var startPopulation = 1;
@@ -56,7 +52,10 @@
 
     var context = canvas.node().getContext("2d");
 
-    var pointGenerator = setInterval(addRandomPoint, 1000);
+    var pointGenerator;
+    setTimeout(function() {
+      pointGenerator = setInterval(addRandomPoint, 1000);
+    }, 3000);
 
     function ticked(e) {
 
