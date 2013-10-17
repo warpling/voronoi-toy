@@ -7,9 +7,15 @@
   </head>
   <body class="vignette">
     <h1>Ryan McLeod</h1>
-    <h2 class="intro">I made this instead of doing my homework.</h2>
+    <h2 class="intro">This is where a quirky series of traits describing me goes, the last of which is tastefully humorous.<br>Are you impressed yet? Excellent.<br>Jump monkey, jump!</h2>
 
     <script type="text/javascript">
+
+    /* TODO List
+      - Convert from Canvas to SVG
+      - Clicking a node should blow it up
+      - Color changing nodes?
+    */
 
     var width = $(document).width(),
         height = $(document).height(),
@@ -25,6 +31,8 @@
       };
     });
 
+    var superNovaNode;
+
     var attractionPoint = {x:width/2, y:height/2};
 
     var voronoi = d3.geom.voronoi()
@@ -37,7 +45,19 @@
         .friction(.95)
         .gravity(.005)
         // .charge(-8)
-        .charge(function(d, i) {return i == (nodes.length-1) ? -30 : -6})
+        .charge(function(d, index) {
+          // Clean this up by adding a force attribute to the nodes
+          switch (index) {
+            case (nodes.length-1):
+              return -30;
+              break;
+            case superNovaNode:
+              return -500;
+              break;
+            default:
+              return -6;
+          }
+        })
         // .alpha(2)
         .size([width, height])
         .nodes(nodes)
@@ -55,6 +75,8 @@
     var pointGenerator;
     setTimeout(function() {
       pointGenerator = setInterval(addRandomPoint, 1000);
+      pointDestroyer = setInterval(removeRandomPoint, 7000);
+
     }, 3000);
 
     function ticked(e) {
@@ -130,6 +152,17 @@
         clearInterval(pointGenerator);
     }
 
+    function removeRandomPoint() {
+      // Super random node selection
+      applySuperNova(0);
+      setTimeout(function(){removePoint(0);}, 150);
+      
+
+      // If we have enough nodes, stop making them
+      if(nodes.length >= endPopulation)
+        clearInterval(pointGenerator);
+    }
+
     function addPoint(coordinates) {      
       force.stop();
       nodes.push({
@@ -140,6 +173,26 @@
       links = voronoi.links(force.nodes())
 
       force.start();
+    }
+
+    function removePoint(index) {
+      if (nodeExists(index)) {
+        // remove superNovaNode flag if necessary
+        if(superNovaNode === index)
+          superNovaNode = undefined;
+        // actually remove node
+        nodes.splice(index, 1);
+        force.start();
+      }
+    }
+
+    function applySuperNova(index) {
+      superNovaNode = index;
+      force.start();
+    }
+
+    function nodeExists(index) {
+      return index >= 0 && index < nodes.length;
     }
 
     </script>
