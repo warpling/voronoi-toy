@@ -12,9 +12,10 @@
     <script type="text/javascript">
 
     /* TODO List
-      - Convert from Canvas to SVG
+      - Convert from Canvas to SVG?
       - Clicking a node should blow it up
       - Color changing nodes?
+      - handle window resize
     */
 
     var width = $(document).width(),
@@ -22,16 +23,16 @@
         τ = 2 * Math.PI;
 
     var startPopulation = 1;
-    var endPopulation = (width * height) / 10000;
+    var endPopulation = (width * height) / 15000;
+    var defaultCharge = -6, superNovaCharge = -600;
 
     var nodes = d3.range(startPopulation).map(function() {
       return {
         x: Math.random() * width,
-        y: Math.random() * height
+        y: Math.random() * height,
+        charge: defaultCharge
       };
     });
-
-    var superNovaNode;
 
     var attractionPoint = {x:width/2, y:height/2};
 
@@ -45,18 +46,8 @@
         .friction(.95)
         .gravity(.005)
         // .charge(-8)
-        .charge(function(d, index) {
-          // Clean this up by adding a force attribute to the nodes
-          switch (index) {
-            case (nodes.length-1):
-              return -30;
-              break;
-            case superNovaNode:
-              return -500;
-              break;
-            default:
-              return -6;
-          }
+        .charge(function(node, index) {
+          return node.charge;
         })
         // .alpha(2)
         .size([width, height])
@@ -82,7 +73,7 @@
     function ticked(e) {
 
       // recalculate voronoi lines
-      links = voronoi.links(force.nodes())
+      // links = voronoi.links(force.nodes())
 
       // Redraw
       context.clearRect(0, 0, width, height);
@@ -125,6 +116,7 @@
     // }
 
     d3.select(window).on("focus", function() {
+      console.log("focused");
       force.resume();
     });
 
@@ -132,10 +124,9 @@
       force.stop();
     });
 
-    d3.select(window).on("mousemove", function() {
-      force.resume();
-    });
-
+    // d3.select(window).on("mousemove", function() {
+    //   force.resume();
+    // });
 
     d3.select(window).on("click", function() {
       var cursor = d3.mouse(graph_canvas);
@@ -167,7 +158,8 @@
       force.stop();
       nodes.push({
           x: coordinates[0],
-          y: coordinates[1]
+          y: coordinates[1],
+          charge: defaultCharge
         });
 
       links = voronoi.links(force.nodes())
@@ -177,17 +169,13 @@
 
     function removePoint(index) {
       if (nodeExists(index)) {
-        // remove superNovaNode flag if necessary
-        if(superNovaNode === index)
-          superNovaNode = undefined;
-        // actually remove node
         nodes.splice(index, 1);
         force.start();
       }
     }
 
     function applySuperNova(index) {
-      superNovaNode = index;
+      nodes[index].charge = superNovaCharge;
       force.start();
     }
 
